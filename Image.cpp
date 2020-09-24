@@ -36,7 +36,6 @@ Image::Image(const Image &img)
 }
 
 Image::~Image() {
-//    stbi_image_free(data);
     delete[] data;
 }
 

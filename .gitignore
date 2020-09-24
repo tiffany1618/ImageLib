@@ -2,3 +2,5 @@
 cmake-build-debug/
 stb/
 images/
+
+main.cpp

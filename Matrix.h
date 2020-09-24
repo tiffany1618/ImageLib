@@ -19,10 +19,13 @@ public:
     int get_cols() const;
     T** get_mat() const;
 
-    Matrix<T> operator*(const Matrix<T> &m);
-    Matrix<T> operator*(T scalar);
-    Matrix<T> operator+(const Matrix<T> &m);
-    Matrix<T> operator-(const Matrix<T> &m);
+    Matrix<T> operator*(const Matrix<T> &m) const;
+    Matrix<T> operator*(T scalar) const;
+    Matrix<T> operator+(const Matrix<T> &m) const;
+    Matrix<T> operator-(const Matrix<T> &m) const;
+
+    void zero();
+    void print();
 
 private:
     int rows;
@@ -33,5 +36,7 @@ private:
     void copy_mat(T **m);
     void delete_mat();
 };
+
+#include "Matrix.cpp"
 
 #endif //PHOTOEDITOR_MATRIX_H

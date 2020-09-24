@@ -2,8 +2,7 @@
 // Created by tiffany on 9/21/20.
 //
 
-#include "Matrix.h"
-#include "util.h"
+#include <iomanip>
 
 template<typename T>
 Matrix<T>::Matrix(int rows, int cols) : rows(rows), cols(cols) {
@@ -77,16 +76,17 @@ T** Matrix<T>::get_mat() const {
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T> &m) {
+Matrix<T> Matrix<T>::operator*(const Matrix<T> &m) const {
     if (this->cols != m.get_rows()) {
-        return nullptr;
+        // TODO: throw error here
     }
 
     Matrix<T> output(this->rows, m.cols);
+    output.zero();
 
     for (int i = 0; i < output.rows; i++) {
         for (int j = 0; j < output.cols; j++) {
-            for (int k = 0; k < m.cols; k++)  {
+            for (int k = 0; k < this->cols; k++)  {
                 output.mat[i][j] += this->mat[i][k] * m.mat[k][j];
             }
         }
@@ -96,7 +96,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &m) {
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator*(T scalar) {
+Matrix<T> Matrix<T>::operator*(T scalar) const {
     Matrix<T> output(this->rows, this->cols);
 
     for (int i = 0; i < rows; i++) {
@@ -109,9 +109,9 @@ Matrix<T> Matrix<T>::operator*(T scalar) {
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T> &m) {
+Matrix<T> Matrix<T>::operator+(const Matrix<T> &m) const {
     if ((this->rows != m.rows) || (this->cols != m.cols)) {
-        return nullptr;
+        // TODO: throw error here
     }
 
     Matrix<T> output(this->rows, this->cols);
@@ -126,9 +126,9 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &m) {
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T> &m) {
+Matrix<T> Matrix<T>::operator-(const Matrix<T> &m) const {
     if ((this->rows != m.rows) || (this->cols != m.cols)) {
-        return nullptr;
+        // TODO: throw error here
     }
 
     Matrix<T> output(this->rows, this->cols);
@@ -140,6 +140,26 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &m) {
     }
 
     return output;
+}
+
+template<typename T>
+void Matrix<T>::zero() {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            mat[i][j] = 0;
+        }
+    }
+}
+
+template<typename T>
+void Matrix<T>::print() {
+    std::cout << std::fixed << std::setprecision(5);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            std::cout << mat[i][j] << ",\t";
+        }
+        std::cout << std::endl;
+    }
 }
 
 template<typename T>

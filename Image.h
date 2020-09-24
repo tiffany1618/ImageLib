@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <cstddef>
 
-#include "Matrix.h"
-
 class Image {
 public:
     Image(const char *filename);
