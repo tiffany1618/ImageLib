@@ -1,7 +1,3 @@
-//
-// Created by tiffany on 9/22/20.
-//
-
 #include <iostream>
 
 #include "core.h"

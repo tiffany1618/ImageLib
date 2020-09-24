@@ -1,7 +1,3 @@
-//
-// Created by tiffany on 9/22/20.
-//
-
 #ifndef PHOTOEDITOR_IMAGE_H
 #define PHOTOEDITOR_IMAGE_H
 

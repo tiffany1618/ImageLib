@@ -1,7 +1,3 @@
-//
-// Created by tiffany on 9/21/20.
-//
-
 #ifndef PHOTOEDITOR_MATRIX_H
 #define PHOTOEDITOR_MATRIX_H
 

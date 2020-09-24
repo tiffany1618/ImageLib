@@ -1,7 +1,3 @@
-//
-// Created by tiffany on 9/21/20.
-//
-
 #include <iomanip>
 
 template<typename T>
