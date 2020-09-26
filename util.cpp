@@ -2,10 +2,15 @@
 
 #include "util.h"
 
-// TODO: What do to about values out of range?
 void create_lookup_table(uint8_t *lut, func_lut f) {
+    int val;
     for (int i = 0; i < 255; i++) {
-        lut[i] = f(i);
+        val = f(i);
+
+        if (val < 0) val = 0;
+        if (val > UINT8_MAX) val = UINT8_MAX;
+
+        lut[i] = val;
     }
 }
 

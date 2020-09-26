@@ -7,14 +7,23 @@
 #include "Matrix.h"
 
 // Colorspace transformation constants
-const double RGB_TO_XYZ_SCAL =  1.0 / 0.17697;
-const double RGB_TO_XYZ_MAT[3][3] = {
+const double LIN_RGB_GAMMA = 2.2;
+const double sRGB_TO_XYZ_MAT[3][3] = {
+        {0.412453, 0.357580, 0.180423},
+        {0.212671, 0.715160, 0.072169},
+        {0.019334, 0.119193, 0.950227}
+};
+const double XYZ_TO_sRGB_MAT[3][3] = {
+        {3.240479, -1.537150, -0.498535},
+        {-0.969256, 1.875992, 0.041556},
+        {0.055648, -0.204043, 1.057311}
+};
+const double CIERGB_TO_XYZ_MAT[3][3] = {
         {0.49, 0.31, 0.20},
         {0.17697, 0.81240, 0.01063},
         {0.0, 0.01,0.99}
 };
-const double XYZ_TO_RGB_SCAL = 0.17697;
-const double XYZ_TO_RGB_MAT[3][3] = {
+const double XYZ_TO_CIERGB_MAT[3][3] = {
         {2.36461, -0.89654, -0.46807},
         {-0.51516, 1.42640, 0.08875},
         {0.00520, -0.01440, 1.00920}

@@ -3,10 +3,14 @@
 
 #include "Image.h"
 
-// Color changes
+// Colorspace changes
 Image to_grayscale(const Image &input);
-Image rgb_to_xyz(const Image &input);
-Image xyz_to_rgb(const Image &input);
+Image linearize_srgb(const Image &input);
+Image unlinearize_srgb(const Image &input);
+Image srgb_to_xyz(const Image &input);
+Image xyz_to_srgb(const Image &input);
+Image xyz_to_lab(const Image &input);
+Image lab_to_xyz(const Image &input);
 
 // Manual color correction
 Image adjust_brightness_rgb(const Image &input, int bias);
