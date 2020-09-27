@@ -4,22 +4,22 @@
 #include "Image.h"
 
 // Colorspace changes
-Image to_grayscale(const Image &input);
-Image linearize_srgb(const Image &input);
-Image unlinearize_srgb(const Image &input);
-Image srgb_to_xyz(const Image &input);
-Image xyz_to_srgb(const Image &input);
-Image xyz_to_lab(const Image &input);
-Image lab_to_xyz(const Image &input);
+Image<uint8_t>to_grayscale(const Image<uint8_t>&input);
+Image<double> linearize_srgb(const Image<uint8_t>&input);
+Image<uint8_t>unlinearize_srgb(const Image<double> &input);
+Image<double> srgb_to_xyz(const Image<double> &input);
+Image<double> xyz_to_srgb(const Image<double> &input);
+Image<double> xyz_to_lab(const Image<double> &input);
+Image<double> lab_to_xyz(const Image<double> &input);
 
 // Manual color correction
-Image adjust_brightness_rgb(const Image &input, int bias);
-Image adjust_contrast_rgb(const Image &input, float gain); // gain > 0
-Image adjust_brightness_xyz(const Image &input, int bias);
-Image adjust_contrast_xyz(const Image &input, float gain); // gain > 0
+Image<uint8_t>adjust_brightness_rgb(const Image<uint8_t>&input, int bias);
+Image<uint8_t>adjust_contrast_rgb(const Image<uint8_t>&input, float gain); // gain > 0
+Image<uint8_t>adjust_brightness_xyz(const Image<uint8_t>&input, int bias);
+Image<uint8_t>adjust_contrast_xyz(const Image<uint8_t>&input, float gain); // gain > 0
 
 // Automatic color correction
-Image full_histogram_eq(const Image &input);
-Image partial_histogram_eq(const Image &input);
+Image<uint8_t>full_histogram_eq(const Image<uint8_t>&input);
+Image<uint8_t>partial_histogram_eq(const Image<uint8_t>&input);
 
 #endif //PHOTOEDITOR_CORE_H

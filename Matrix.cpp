@@ -24,7 +24,7 @@ Matrix<T>::~Matrix() {
 }
 
 template<typename T>
-Matrix<T>& Matrix<T>::operator=(const Matrix &m) {
+Matrix<T>& Matrix<T>::operator=(const Matrix<T> &m) {
     if (this != &m) {
         if ((this->rows != m.rows) || (this->cols != m.cols)) {
             delete_mat();

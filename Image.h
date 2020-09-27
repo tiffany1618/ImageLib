@@ -4,19 +4,20 @@
 #include <cstdint>
 #include <cstddef>
 
+template<typename T>
 class Image {
 public:
-    Image(const char *filename);
+    explicit Image(const char *filename);
     Image(int width, int height, int channels);
-    Image(const Image &img);
+    Image(const Image<T> &img);
     ~Image();
-    Image& operator=(const Image &img);
+    Image<T>& operator=(const Image<T> &img);
 
     int get_height() const;
     int get_width() const;
     int get_channels() const;
     int get_size() const;
-    uint8_t* get_data() const;
+    T* get_data() const;
 
     // Write to file
     void write_png(const char *filename) const;
@@ -27,7 +28,7 @@ private:
     int width;
     int channels;
     int size;
-    uint8_t *data;
+    T *data;
 };
 
 #endif //PHOTOEDITOR_IMAGE_H

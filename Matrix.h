@@ -8,7 +8,7 @@ public:
     Matrix(int rows, int cols, T **mat);
     Matrix(const Matrix &m);
     ~Matrix();
-    Matrix<T>& operator=(const Matrix &m);
+    Matrix<T>& operator=(const Matrix<T> &m);
     Matrix<T>& operator=(T **mat);
 
     int get_rows() const;

@@ -5,7 +5,7 @@
 #include "util.h"
 #include "Matrix.h"
 
-Image to_grayscale(const Image &input) {
+Image<uint8_t> to_grayscale(const Image<uint8_t> &input) {
     int channels;
     if (input.get_channels() == 4) {
         channels = 2;
@@ -13,7 +13,7 @@ Image to_grayscale(const Image &input) {
         channels = 1;
     }
 
-    Image output(input.get_width(), input.get_height(), channels);
+    Image<uint8_t> output(input.get_width(), input.get_height(), channels);
 
     for (uint8_t *i = input.get_data(), *j = output.get_data(); i != input.get_data() + input.get_size();
          i += input.get_channels(), j += output.get_channels()) {
@@ -27,25 +27,35 @@ Image to_grayscale(const Image &input) {
     return output;
 }
 
-Image linearize_srgb(const Image &input) {
-    uint8_t lut[256];
-    create_lookup_table(lut, [] (int num) -> uint8_t {
-       return static_cast<uint8_t>(pow((double) num / 255, LIN_RGB_GAMMA) * 255 + 0.5);
+Image<double> linearize_srgb(const Image<uint8_t> &input) {
+    double lut[256];
+    create_lookup_table<double>(lut, [] (int num) -> double {
+        double val = static_cast<double>(num);
+        if (val <= 10) {
+            val /= 3294.6;
+        } else {
+            val = pow((val + 14.025) / 269.025, 2.4);
+        }
+
+        return val;
     });
 
-    return point_op_lut(input, lut);
+    return point_op_lut<double>(input, lut);
 }
 
-Image unlinearize_srgb(const Image &input) {
-    uint8_t lut[256];
-    create_lookup_table(lut, [] (int num) -> uint8_t {
-        return static_cast<uint8_t>(pow((double) num / 255, 1.0 / LIN_RGB_GAMMA) * 255 + 0.5);
+Image<uint8_t> unlinearize_srgb(const Image<double> &input) {
+    return point_op<double, uint8_t>(input, [] (double num) -> uint8_t {
+        if (num <= 0.0031308) {
+            num *= 3294.6;
+        } else {
+            num = 269.025 * pow(num, 1.0 /  2.4) - 14.025;
+        }
+
+        return static_cast<uint8_t>(num + 0.5);
     });
-
-    return point_op_lut(input, lut);
 }
 
-Image srgb_to_xyz(const Image &input) {
+Image<double> srgb_to_xyz(const Image<double> &input) {
     Matrix<double> trans(3, 3);
     for (int i = 0; i < trans.get_rows(); i++) {
         for (int j = 0; j < trans.get_cols(); j++) {
@@ -53,10 +63,10 @@ Image srgb_to_xyz(const Image &input) {
         }
     }
 
-    return colorspace_change(input, trans);
+    return linear_colorspace_change<double>(input, trans);
 }
 
-Image xyz_to_srgb(const Image &input) {
+Image<double> xyz_to_srgb(const Image<double> &input) {
     Matrix<double> trans(3, 3);
     for (int i = 0; i < trans.get_rows(); i++) {
         for (int j = 0; j < trans.get_cols(); j++) {
@@ -64,59 +74,51 @@ Image xyz_to_srgb(const Image &input) {
         }
     }
 
-    return colorspace_change(input, trans);
+    return linear_colorspace_change<double>(input, trans);
 }
 
-Image adjust_brightness_rgb(const Image &input, int bias) {
+Image<uint8_t> adjust_brightness_rgb(const Image<uint8_t> &input, int bias) {
     uint8_t lut[256];
-    create_lookup_table(lut, [=] (int num) -> uint8_t  {
+    create_lookup_table<uint8_t>(lut, [=] (int num) -> uint8_t  {
         return static_cast<uint8_t>(num + bias);
     });
 
-    return point_op_lut(input, lut);
+    return point_op_lut<uint8_t>(input, lut);
 }
 
-Image adjust_contrast_rgb(const Image &input, float gain) {
+Image<uint8_t> adjust_contrast_rgb(const Image<uint8_t> &input, float gain) {
     uint8_t lut[256];
-    create_lookup_table(lut, [=] (int num) -> uint8_t {
+    create_lookup_table<uint8_t>(lut, [=] (int num) -> uint8_t {
         return static_cast<uint8_t>(num * gain + 0.5);
     });
 
-    return point_op_lut(input, lut);
+    return point_op_lut<uint8_t>(input, lut);
 }
 
-Image adjust_brightness_xyz(const Image &input, int bias) {
-    uint8_t lut[256];
-    create_lookup_table(lut, [=] (int num) -> uint8_t {
-       return static_cast<uint8_t>(num + bias);
-    });
+Image<uint8_t> adjust_brightness_xyz(const Image<uint8_t> &input, int bias) {
+    double adj_bias = static_cast<double>(bias) / 255;
 
-    Image output = srgb_to_xyz(linearize_srgb(input));
-    for (uint8_t *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
-        *(i + 1) = lut[*(i + 1)];
+    Image<double> output = srgb_to_xyz(linearize_srgb(input));
+    for (double *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
+        *(i + 1) += adj_bias;
     }
 
     return unlinearize_srgb(xyz_to_srgb(output));
 }
 
-Image adjust_contrast_xyz(const Image &input, float gain) {
-    uint8_t lut[256];
-    create_lookup_table(lut, [=] (int num) -> uint8_t {
-        return static_cast<uint8_t>(num * gain + 0.5);
-    });
-
-    Image output = srgb_to_xyz(linearize_srgb(input));
-    for (uint8_t *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
-        *(i + 1) = lut[*(i + 1)];
+Image<uint8_t> adjust_contrast_xyz(const Image<uint8_t> &input, float gain) {
+    Image<double> output = srgb_to_xyz(linearize_srgb(input));
+    for (double *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
+        *(i + 1) *= gain;
     }
 
     return unlinearize_srgb(xyz_to_srgb(output));
 }
 
-Image full_histogram_eq(const Image &input) {
-
-}
-
-Image partial_histogram_eq(const Image &input) {
-    return Image(nullptr);
-}
+//Image<uint8_t> full_histogram_eq(const Image<uint8_t> &input) {
+//
+//}
+//
+//Image<uint8_t> partial_histogram_eq(const Image<uint8_t> &input) {
+//
+//}

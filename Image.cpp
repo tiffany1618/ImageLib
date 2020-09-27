@@ -1,41 +1,45 @@
 #include <iostream>
 
 #include "Image.h"
-#include "util.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
-Image::Image(const char *filename) {
+template<typename T>
+Image<T>::Image(const char *filename) {
     uint8_t *temp = stbi_load(filename, &width, &height, &channels, 0);
     size = width * height * channels;
-    this->data = new uint8_t[size];
+    this->data = new T[size];
 
     for (int i = 0; i < size; i++) {
-        data[i] = temp[i];
+        data[i] = static_cast<T>(temp[i]);
     }
 }
 
-Image::Image(int width, int height, int channels)
+template<typename T>
+Image<T>::Image(int width, int height, int channels)
     : width(width), height(height), channels(channels), size(width * height * channels) {
-    this->data = new uint8_t[size];
+    this->data = new T[size];
 }
 
-Image::Image(const Image &img)
+template<typename T>
+Image<T>::Image(const Image<T> &img)
     : width(img.width), height(img.height), channels(img.channels), size(width * height * channels) {
-    this->data = new uint8_t[this->size];
+    this->data = new T[this->size];
 
     for (int i = 0; i < this->size; i++) {
         this->data[i] = img.data[i];
     }
 }
 
-Image::~Image() {
+template<typename T>
+Image<T>::~Image() {
     delete[] data;
 }
 
-Image& Image::operator=(const Image &img) {
+template<typename T>
+Image<T>& Image<T>::operator=(const Image<T> &img) {
     if (this != &img) {
         this->width = img.width;
         this->height = img.height;
@@ -50,31 +54,45 @@ Image& Image::operator=(const Image &img) {
     return *this;
 }
 
-int Image::get_height() const {
+template<typename T>
+int Image<T>::get_height() const {
     return height;
 }
 
-int Image::get_width() const {
+template<typename T>
+int Image<T>::get_width() const {
     return width;
 }
 
-int Image::get_channels() const {
+template<typename T>
+int Image<T>::get_channels() const {
     return channels;
 }
 
-int Image::get_size() const {
+template<typename T>
+int Image<T>::get_size() const {
     return size;
 }
 
-uint8_t* Image::get_data() const {
+template<typename T>
+T* Image<T>::get_data() const {
     return data;
 }
 
-void Image::write_png(const char *filename) const {
-    stbi_write_png(filename, width, height, channels, data, width * channels);
+template<typename T>
+void Image<T>::write_png(const char *filename) const {
+    if (std::is_same<T, uint8_t>::value) {
+        stbi_write_png(filename, width, height, channels, data, width * channels);
+    } else {
+
+    }
 }
 
-void Image::write_jpg(const char *filename, int quality) const {
+template<typename T>
+void Image<T>::write_jpg(const char *filename, int quality) const {
     stbi_write_jpg(filename, width, height, channels, data, quality);
 }
+
+template class Image<uint8_t>;
+template class Image<double>;
 
