@@ -2,7 +2,7 @@
 
 #include "util.h"
 
-void generate_xyz_tristimulus_vals(std::string ref_white, double &x_n, double &y_n, double &z_n) {
+void generate_xyz_tristimulus_vals(const std::string &ref_white, double &x_n, double &y_n, double &z_n) {
     if (ref_white == "D50" || ref_white == "d50") {
         x_n = 96.4212;
         y_n = 100;

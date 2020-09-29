@@ -33,7 +33,7 @@ const double XYZ_TO_CIERGB_MAT[3][3] = {
 };
 
 // Image helper functions
-void generate_xyz_tristimulus_vals(std::string ref_white, double &x_n, double &y_n, double &z_n);
+void generate_xyz_tristimulus_vals(const std::string &ref_white, double &x_n, double &y_n, double &z_n);
 double xyz_to_lab_func(double num);
 double lab_to_xyz_func(double num);
 void generate_histogram_percentiles(const Image<double> &input, std::map<double, double> &percentiles);
@@ -112,15 +112,15 @@ Image<T> linear_colorspace_change(const Image<T> &input, const Matrix<double> &m
 
     for (T *i = input.get_data(), *j = output.get_data(); i != input.get_data() + input.get_size();
          i += input.get_channels(), j += output.get_channels()) {
-        orig.get_mat()[0][0] = static_cast<double>(*i);
-        orig.get_mat()[1][0] = static_cast<double>(*(i + 1));
-        orig.get_mat()[2][0] = static_cast<double>(*(i + 2));
+        orig.get_mat()[0][0] = *i;
+        orig.get_mat()[1][0] = *(i + 1);
+        orig.get_mat()[2][0] = *(i + 2);
 
         temp = mat * orig;
 
-        *j = static_cast<T>(temp.get_mat()[0][0]);
-        *(j + 1) = static_cast<T>(temp.get_mat()[1][0]);
-        *(j + 2) = static_cast<T>(temp.get_mat()[2][0]);
+        *j = temp.get_mat()[0][0];
+        *(j + 1) = temp.get_mat()[1][0];
+        *(j + 2) = temp.get_mat()[2][0];
 
         if (input.get_channels() == 4) {
             *(j + 3) = *(i + 3);

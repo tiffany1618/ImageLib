@@ -165,21 +165,9 @@ Image<uint8_t> adjust_contrast_xyz(const Image<uint8_t> &input, float gain) {
     return unlinearize_srgb(xyz_to_srgb(output));
 }
 
-Image<uint8_t> full_histogram_eq(const Image<uint8_t> &input, const std::string &ref_white) {
-    Image<double> output = xyz_to_lab(srgb_to_xyz(linearize_srgb(input)), ref_white);
-    std::map<double, double> percentiles;
-    generate_histogram_percentiles(output, percentiles);
-
-    for (double *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
-        *i = percentiles[*i] * 100;
-    }
-
-    return unlinearize_srgb(xyz_to_srgb(lab_to_xyz(output, ref_white)));
-}
-
 // alpha = 0 corresponds to no equalization
 // alpha = 1 corresponds to full equalization
-Image<uint8_t> partial_histogram_eq(const Image<uint8_t> &input, double alpha, const std::string &ref_white) {
+Image<uint8_t> histogram_equalization(const Image<uint8_t> &input, double alpha, const std::string &ref_white) {
     Image<double> output = xyz_to_lab(srgb_to_xyz(linearize_srgb(input)), ref_white);
     std::map<double, double> percentiles;
     generate_histogram_percentiles(output, percentiles);
