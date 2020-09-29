@@ -1,6 +1,7 @@
 #ifndef PHOTOEDITOR_UTIL_H
 #define PHOTOEDITOR_UTIL_H
 
+#include <string>
 #include <functional>
 #include <limits>
 
@@ -30,7 +31,12 @@ const double XYZ_TO_CIERGB_MAT[3][3] = {
         {0.00520, -0.01440, 1.00920}
 };
 
-// Image helper functions definitions
+// Image helper functions
+void lab_xyz_white_point_vals(std::string ref_white, double &x_n, double &y_n, double &z_n);
+double xyz_to_lab_func(double num);
+double lab_to_xyz_func(double num);
+
+// Template image helper functions definitions
 template<typename T>
 void create_lookup_table(T *lut, std::function<T(int)> f);
 template<typename T>
@@ -41,7 +47,7 @@ Image<S> point_op(const Image<T> &input, std::function<S(T)> f);
 template<typename T>
 Image<T> linear_colorspace_change(const Image<T> &input, const Matrix<double> &mat);
 
-// Image helper functions implementations
+// Template image helper functions implementations
 template<typename T>
 void create_lookup_table(T *lut, std::function<T(int)> f) {
     T val, max = std::numeric_limits<T>::max();

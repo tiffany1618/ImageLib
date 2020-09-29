@@ -80,6 +80,52 @@ Image<double> xyz_to_srgb(const Image<double> &input) {
     return linear_colorspace_change<double>(input, trans);
 }
 
+Image<double> xyz_to_lab(const Image<double> &input, std::string ref_white) {
+    double x_n, y_n, z_n;
+    lab_xyz_white_point_vals(ref_white, x_n, y_n, z_n);
+
+    Image<double> output(input.get_width(), input.get_height(), input.get_channels());
+    double x, y, z;
+    for (double *i = input.get_data(), *j = output.get_data(); i < input.get_data() + input.get_size();
+        i += input.get_channels(), j += output.get_channels()) {
+        x = xyz_to_lab_func((*i) / x_n);
+        y = xyz_to_lab_func((*(i + 1)) / y_n);
+        z = xyz_to_lab_func((*(i + 2)) / z_n);
+
+        *j = 116.0 * y - 16;
+        *(j + 1) = 500.0 * (x - y);
+        *(j + 2) = 200.0 * (y - z);
+
+        if (input.get_channels() == 4) {
+            *(j + 3) = *(i + 3);
+        }
+    }
+
+    return output;
+}
+
+Image<double> lab_to_xyz(const Image<double> &input, std::string ref_white) {
+    double x_n, y_n, z_n;
+    lab_xyz_white_point_vals(ref_white, x_n, y_n, z_n);
+
+    Image<double> output(input.get_width(), input.get_height(), input.get_channels());
+    double n;
+    for (double *i = input.get_data(), *j = output.get_data(); i < input.get_data() + input.get_size();
+         i += input.get_channels(), j += output.get_channels()) {
+        n = ((*i) + 16) / 116.0;
+
+        *j = x_n * lab_to_xyz_func(n + (*(i + 1)) / 500.0);
+        *(j + 1) = y_n * lab_to_xyz_func(n);
+        *(j + 2) = z_n * lab_to_xyz_func(n - (*(i + 2)) / 200.0);
+
+        if (input.get_channels() == 4) {
+            *(j + 3) = *(i + 3);
+        }
+    }
+
+    return output;
+}
+
 Image<uint8_t> adjust_brightness_rgb(const Image<uint8_t> &input, int bias) {
     uint8_t lut[256];
     create_lookup_table<uint8_t>(lut, [=] (int num) -> uint8_t  {
