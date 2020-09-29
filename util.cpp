@@ -2,7 +2,7 @@
 
 #include "util.h"
 
-void lab_xyz_white_point_vals(std::string ref_white, double &x_n, double &y_n, double &z_n) {
+void generate_xyz_tristimulus_vals(std::string ref_white, double &x_n, double &y_n, double &z_n) {
     if (ref_white == "D50" || ref_white == "d50") {
         x_n = 96.4212;
         y_n = 100;
@@ -33,5 +33,24 @@ double lab_to_xyz_func(double num) {
         return pow(num, 3);
     } else {
         return (3 * d * d) * (num - 4.0 / 29);
+    }
+}
+
+void generate_histogram_percentiles(const Image<double> &input, std::map<double, double> &percentiles) {
+    std::map<double, int> histogram;
+
+    for (double *i = input.get_data(); i < input.get_data() + input.get_size(); i += input.get_channels()) {
+        if (histogram.find(*i) == histogram.end()) {
+            histogram[*i] = 1;
+        } else {
+            histogram[*i]++;
+        }
+    }
+
+    int sum = 0;
+    int num_pixels = input.get_width() * input.get_height();
+    for (auto i = histogram.begin(); i != histogram.end(); i++) {
+        sum += i->second;
+        percentiles[i->first] = static_cast<double>(sum) / num_pixels;
     }
 }

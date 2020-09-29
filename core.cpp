@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <map>
 
 #include "core.h"
 #include "util.h"
@@ -80,17 +81,17 @@ Image<double> xyz_to_srgb(const Image<double> &input) {
     return linear_colorspace_change<double>(input, trans);
 }
 
-Image<double> xyz_to_lab(const Image<double> &input, std::string ref_white) {
+Image<double> xyz_to_lab(const Image<double> &input, const std::string &ref_white) {
     double x_n, y_n, z_n;
-    lab_xyz_white_point_vals(ref_white, x_n, y_n, z_n);
+    generate_xyz_tristimulus_vals(ref_white, x_n, y_n, z_n);
 
     Image<double> output(input.get_width(), input.get_height(), input.get_channels());
     double x, y, z;
     for (double *i = input.get_data(), *j = output.get_data(); i < input.get_data() + input.get_size();
         i += input.get_channels(), j += output.get_channels()) {
-        x = xyz_to_lab_func((*i) / x_n);
-        y = xyz_to_lab_func((*(i + 1)) / y_n);
-        z = xyz_to_lab_func((*(i + 2)) / z_n);
+        x = xyz_to_lab_func((*i) * 100 / x_n);
+        y = xyz_to_lab_func((*(i + 1)) * 100 / y_n);
+        z = xyz_to_lab_func((*(i + 2)) * 100 / z_n);
 
         *j = 116.0 * y - 16;
         *(j + 1) = 500.0 * (x - y);
@@ -104,9 +105,9 @@ Image<double> xyz_to_lab(const Image<double> &input, std::string ref_white) {
     return output;
 }
 
-Image<double> lab_to_xyz(const Image<double> &input, std::string ref_white) {
+Image<double> lab_to_xyz(const Image<double> &input, const std::string &ref_white) {
     double x_n, y_n, z_n;
-    lab_xyz_white_point_vals(ref_white, x_n, y_n, z_n);
+    generate_xyz_tristimulus_vals(ref_white, x_n, y_n, z_n);
 
     Image<double> output(input.get_width(), input.get_height(), input.get_channels());
     double n;
@@ -114,9 +115,9 @@ Image<double> lab_to_xyz(const Image<double> &input, std::string ref_white) {
          i += input.get_channels(), j += output.get_channels()) {
         n = ((*i) + 16) / 116.0;
 
-        *j = x_n * lab_to_xyz_func(n + (*(i + 1)) / 500.0);
-        *(j + 1) = y_n * lab_to_xyz_func(n);
-        *(j + 2) = z_n * lab_to_xyz_func(n - (*(i + 2)) / 200.0);
+        *j = x_n * lab_to_xyz_func(n + (*(i + 1)) / 500.0) / 100;
+        *(j + 1) = y_n * lab_to_xyz_func(n) / 100;
+        *(j + 2) = z_n * lab_to_xyz_func(n - (*(i + 2)) / 200.0) / 100;
 
         if (input.get_channels() == 4) {
             *(j + 3) = *(i + 3);
@@ -164,10 +165,28 @@ Image<uint8_t> adjust_contrast_xyz(const Image<uint8_t> &input, float gain) {
     return unlinearize_srgb(xyz_to_srgb(output));
 }
 
-//Image<uint8_t> full_histogram_eq(const Image<uint8_t> &input) {
-//
-//}
-//
-//Image<uint8_t> partial_histogram_eq(const Image<uint8_t> &input) {
-//
-//}
+Image<uint8_t> full_histogram_eq(const Image<uint8_t> &input, const std::string &ref_white) {
+    Image<double> output = xyz_to_lab(srgb_to_xyz(linearize_srgb(input)), ref_white);
+    std::map<double, double> percentiles;
+    generate_histogram_percentiles(output, percentiles);
+
+    for (double *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
+        *i = percentiles[*i] * 100;
+    }
+
+    return unlinearize_srgb(xyz_to_srgb(lab_to_xyz(output, ref_white)));
+}
+
+// alpha = 0 corresponds to no equalization
+// alpha = 1 corresponds to full equalization
+Image<uint8_t> partial_histogram_eq(const Image<uint8_t> &input, double alpha, const std::string &ref_white) {
+    Image<double> output = xyz_to_lab(srgb_to_xyz(linearize_srgb(input)), ref_white);
+    std::map<double, double> percentiles;
+    generate_histogram_percentiles(output, percentiles);
+
+    for (double *i = output.get_data(); i < output.get_data() + output.get_size(); i += output.get_channels()) {
+        *i = (alpha * percentiles[*i] * 100) + ((1.0 - alpha) * (*i));
+    }
+
+    return unlinearize_srgb(xyz_to_srgb(lab_to_xyz(output, ref_white)));
+}
