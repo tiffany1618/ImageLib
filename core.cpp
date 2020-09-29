@@ -51,7 +51,10 @@ Image<uint8_t> unlinearize_srgb(const Image<double> &input) {
             num = 269.025 * pow(num, 1.0 /  2.4) - 14.025;
         }
 
-        return static_cast<uint8_t>(num + 0.5);
+        if (num < 0) num = 0;
+        if (num > UINT8_MAX) num = UINT8_MAX;
+
+        return static_cast<uint8_t>(round(num));
     });
 }
 
@@ -89,7 +92,7 @@ Image<uint8_t> adjust_brightness_rgb(const Image<uint8_t> &input, int bias) {
 Image<uint8_t> adjust_contrast_rgb(const Image<uint8_t> &input, float gain) {
     uint8_t lut[256];
     create_lookup_table<uint8_t>(lut, [=] (int num) -> uint8_t {
-        return static_cast<uint8_t>(num * gain + 0.5);
+        return static_cast<uint8_t>(round(num * gain));
     });
 
     return point_op_lut<uint8_t>(input, lut);

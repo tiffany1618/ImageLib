@@ -99,20 +99,20 @@ Image<S> point_op(const Image<T> &input, std::function<S(T)> f) {
 template<typename T>
 Image<T> linear_colorspace_change(const Image<T> &input, const Matrix<double> &mat) {
     Image<T> output(input.get_width(), input.get_height(), input.get_channels());
-    Matrix<double> rgb(3, 1);
+    Matrix<double> orig(3, 1);
     Matrix<double> temp(3, 1);
 
     for (T *i = input.get_data(), *j = output.get_data(); i != input.get_data() + input.get_size();
          i += input.get_channels(), j += output.get_channels()) {
-        rgb.get_mat()[0][0] = static_cast<double>(*i);
-        rgb.get_mat()[1][0] = static_cast<double>(*(i + 1));
-        rgb.get_mat()[2][0] = static_cast<double>(*(i + 2));
+        orig.get_mat()[0][0] = static_cast<double>(*i);
+        orig.get_mat()[1][0] = static_cast<double>(*(i + 1));
+        orig.get_mat()[2][0] = static_cast<double>(*(i + 2));
 
-        temp = mat * rgb;
+        temp = mat * orig;
 
-        *j = static_cast<T>(temp.get_mat()[0][0] + 0.5);
-        *(j + 1) = static_cast<T>(temp.get_mat()[1][0] + 0.5);
-        *(j + 2) = static_cast<T>(temp.get_mat()[2][0] + 0.5);
+        *j = static_cast<T>(temp.get_mat()[0][0]);
+        *(j + 1) = static_cast<T>(temp.get_mat()[1][0]);
+        *(j + 2) = static_cast<T>(temp.get_mat()[2][0]);
 
         if (input.get_channels() == 4) {
             *(j + 3) = *(i + 3);
