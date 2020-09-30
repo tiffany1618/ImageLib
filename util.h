@@ -3,7 +3,6 @@
 
 #include <string>
 #include <functional>
-#include <limits>
 #include <map>
 
 #include "Image.h"
@@ -40,6 +39,8 @@ void generate_histogram_percentiles(const Image<double> &input, std::map<double,
 
 // Template image helper functions definitions
 template<typename T>
+uint8_t cast_uint8_t(T num);
+template<typename T>
 void create_lookup_table(T *lut, std::function<T(int)> f);
 template<typename T>
 Image<T> point_op_lut(const Image<uint8_t> &input, const T *lut);
@@ -51,15 +52,19 @@ Image<T> linear_colorspace_change(const Image<T> &input, const Matrix<double> &m
 
 // Template image helper functions implementations
 template<typename T>
+uint8_t cast_uint8_t(T num) {
+    num = round(num);
+
+    if (num < 0) num = 0;
+    if (num > UINT8_MAX) num = UINT8_MAX;
+
+    return static_cast<uint8_t>(num);
+}
+
+template<typename T>
 void create_lookup_table(T *lut, std::function<T(int)> f) {
-    T val, max = std::numeric_limits<T>::max();
-    for (int i = 0; i < 255; i++) {
-        val = f(i);
-
-        if (val < 0) val = 0;
-        if (val > max) val = max;
-
-        lut[i] = val;
+    for (int i = 0; i < 256; i++) {
+        lut[i] = f(i);
     }
 }
 
@@ -74,6 +79,9 @@ Image<T> point_op_lut(const Image<uint8_t> &input, const T *lut) {
         *j = lut[*i];
         *(j + 1) = lut[*(i + 1)];
         *(j + 2) = lut[*(i + 2)];
+
+//        std::cout << "1: " << (int) *i << ", " << (int) *(i+1) << ", " << (int) *(i+2) << std::endl;
+//        std::cout << "2: " << (int) *j << ", " << (int) *(j+1) << ", " << (int) *(j+2) << std::endl;
 
         // Copy over transparency channel if it exists
         if (input.get_channels() == 4) {
