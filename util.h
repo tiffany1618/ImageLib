@@ -80,9 +80,6 @@ Image<T> point_op_lut(const Image<uint8_t> &input, const T *lut) {
         *(j + 1) = lut[*(i + 1)];
         *(j + 2) = lut[*(i + 2)];
 
-//        std::cout << "1: " << (int) *i << ", " << (int) *(i+1) << ", " << (int) *(i+2) << std::endl;
-//        std::cout << "2: " << (int) *j << ", " << (int) *(j+1) << ", " << (int) *(j+2) << std::endl;
-
         // Copy over transparency channel if it exists
         if (input.get_channels() == 4) {
             *(j + 3) = static_cast<T>(*(i + 3));
