@@ -3,9 +3,9 @@
 #include <map>
 #include <algorithm>
 
-#include "core.h"
-#include "util.h"
-#include "Matrix.h"
+#include "../include/core.h"
+#include "../include/util.h"
+#include "../Matrix.h"
 
 Image<uint8_t> to_grayscale(const Image<uint8_t> &input) {
     int channels;
