@@ -1,6 +1,7 @@
 #include <cmath>
+#include <iostream>
 
-#include "../include/util.h"
+#include "util.hpp"
 
 void generate_xyz_tristimulus_vals(const std::string &ref_white, double &x_n, double &y_n, double &z_n) {
     if (ref_white == "D50" || ref_white == "d50") {

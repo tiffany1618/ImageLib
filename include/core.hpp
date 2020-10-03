@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "Image.h"
+#include "Image.hpp"
 
 // Colorspace changes
 Image<uint8_t> to_grayscale(const Image<uint8_t> &input);

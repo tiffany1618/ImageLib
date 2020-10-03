@@ -5,8 +5,8 @@
 #include <functional>
 #include <map>
 
-#include "Image.h"
-#include "../Matrix.h"
+#include "Image.hpp"
+#include "Matrix.hpp"
 
 // Colorspace transformation constants
 const double LIN_RGB_GAMMA = 2.2;
