@@ -215,6 +215,8 @@ Image<uint8_t> hsv_to_rgb(const Image<double> &input) {
             *j = v;
             *(j + 1) = v;
             *(j + 2) = v;
+
+            return output;
         }
 
         f = h - floor(h);
