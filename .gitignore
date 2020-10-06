@@ -4,4 +4,11 @@ cmake-build-release/
 stb/
 images/
 
+# Conan files
+conaninfo.txt
+conan.lock
+conanbuildinfo.cmake
+conanbuildinfo.txt
+graph_info.json
+
 main.cpp
